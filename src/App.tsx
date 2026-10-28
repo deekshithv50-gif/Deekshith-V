@@ -54,26 +54,46 @@ import { getOfficeStatus } from './utils/officeHours';
 export default function App() {
   const { language, setLanguage, t, isKannada, isEnglish } = useLanguage();
 
-  // Local storage backed state
+  // Local storage backed state with bulletproof error handling
   const [panchayat, setPanchayat] = useState<GramPanchayatInfo>(() => {
-    const saved = localStorage.getItem('gp_panchayat_info');
-    return saved ? JSON.parse(saved) : DEFAULT_GRAM_PANCHAYAT;
+    try {
+      const saved = localStorage.getItem('gp_panchayat_info');
+      return saved ? JSON.parse(saved) : DEFAULT_GRAM_PANCHAYAT;
+    } catch (e) {
+      console.warn('Using default panchayat info:', e);
+      return DEFAULT_GRAM_PANCHAYAT;
+    }
   });
 
   const [complaints, setComplaints] = useState<Complaint[]>(() => {
-    const saved = localStorage.getItem('gp_complaints_list');
-    return saved ? JSON.parse(saved) : INITIAL_COMPLAINTS;
+    try {
+      const saved = localStorage.getItem('gp_complaints_list');
+      return saved ? JSON.parse(saved) : INITIAL_COMPLAINTS;
+    } catch (e) {
+      console.warn('Using default complaints list:', e);
+      return INITIAL_COMPLAINTS;
+    }
   });
 
   const [councilMembers, setCouncilMembers] = useState<CouncilMember[]>(() => {
-    const saved = localStorage.getItem('gp_council_members');
-    return saved ? JSON.parse(saved) : INITIAL_COUNCIL_MEMBERS;
+    try {
+      const saved = localStorage.getItem('gp_council_members');
+      return saved ? JSON.parse(saved) : INITIAL_COUNCIL_MEMBERS;
+    } catch (e) {
+      console.warn('Using default council members:', e);
+      return INITIAL_COUNCIL_MEMBERS;
+    }
   });
 
   // Public unauthenticated visitor by default; stored session if user logged in
   const [user, setUser] = useState<UserSession | null>(() => {
-    const saved = localStorage.getItem('gp_user_session');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('gp_user_session');
+      return saved ? JSON.parse(saved) : null;
+    } catch (e) {
+      console.warn('No active user session:', e);
+      return null;
+    }
   });
 
   // Default to public complaint tracking view so visitors can freely explore without login
@@ -94,16 +114,26 @@ export default function App() {
 
   // Accessibility State (saved in localStorage for inclusive citizen experience)
   const [accessibility, setAccessibility] = useState<AccessibilitySettings>(() => {
-    const saved = localStorage.getItem('gp_accessibility_settings');
-    return saved
-      ? JSON.parse(saved)
-      : {
-          fontScale: 'normal',
-          highContrast: false,
-          dyslexicFont: false,
-          reducedMotion: false,
-          screenReaderActive: false,
-        };
+    try {
+      const saved = localStorage.getItem('gp_accessibility_settings');
+      return saved
+        ? JSON.parse(saved)
+        : {
+            fontScale: 'normal',
+            highContrast: false,
+            dyslexicFont: false,
+            reducedMotion: false,
+            screenReaderActive: false,
+          };
+    } catch (e) {
+      return {
+        fontScale: 'normal',
+        highContrast: false,
+        dyslexicFont: false,
+        reducedMotion: false,
+        screenReaderActive: false,
+      };
+    }
   });
 
   // Sync to localStorage

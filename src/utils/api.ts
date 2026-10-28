@@ -36,8 +36,13 @@ export const api = {
       return await res.json();
     } catch (err) {
       console.warn('[API] Fetching from local storage fallback:', err);
-      const saved = localStorage.getItem('gp_complaints_list');
-      const data: Complaint[] = saved ? JSON.parse(saved) : [];
+      let data: Complaint[] = [];
+      try {
+        const saved = localStorage.getItem('gp_complaints_list');
+        if (saved) data = JSON.parse(saved);
+      } catch (parseErr) {
+        console.warn('Failed to parse complaints fallback:', parseErr);
+      }
       return { success: true, data };
     }
   },
